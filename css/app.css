@@ -1,0 +1,122 @@
+html {
+  font-family: Orbitron, sans-serif; 
+}
+
+body {
+  background: #333333;
+  margin: 0px;
+  padding: 0px; 
+}
+
+header h1 {
+  text-transform: uppercase;
+  font-size: 20px;
+  color: white; 
+}
+
+.cabecera {
+  margin: 10px;
+  border-bottom: 1px solid #5C5C5C;
+  display: block; 
+}
+
+.dashboard {
+  display: block;
+  margin: 30px 30px 30px 30px;
+  padding: 70px; 
+}
+
+.background {
+  background-image: url("../img/background.jpg");
+  background-size: cover; 
+}
+
+.contenedor {
+  padding: 60px;
+  background-color: #F9F2E0; 
+}
+
+.contenedor section {
+  background: white;
+  border: 1px solid #edeeee; 
+}
+
+.contenedor h2 {
+  font-size: 40px; 
+}
+
+.contenedor h3 {
+  font-size: 20px;
+  border-bottom: 1px solid #5C5C5C; 
+}
+
+#map-canvas {
+  width: 100%;
+  height: 350px; 
+}
+
+.contenedor-bromas {
+  padding: 10px; 
+}
+
+.fuente-montserrat {
+  font-family: Montserrat, sans-serif !important; 
+}
+
+.fuente-montserrat p {
+  font-size: 13px; 
+}
+
+.contenedor-grafico {
+  padding: 10px; 
+}
+
+.contenedor-mapa {
+  padding: 10px; 
+}
+
+.add-broma {
+  font-size: 25px;
+  position: relative;
+  bottom: 5px; 
+}
+
+.add-broma:hover {
+  color: #004B9C; 
+}
+
+.op-broma {
+  float: right;
+  margin-top: -14px; 
+}
+
+.op-broma a {
+  padding: -1px 15px; 
+}
+
+.btneliminar {
+  color: red !important; 
+  border: 1px solid red;
+}
+
+.btnmodificar {
+  color: blue !important;
+  border: 1px solid blue;
+}
+
+.scroll {
+  overflow: auto;
+  height: 231px; 
+}
+
+.modal-content h4 {
+  border-bottom: 1px solid #5C5C5C; 
+}
+
+.margin-bottom {
+  margin-bottom: 10px !important;
+}
+
+select {
+  display: block !important;
+}

@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <title>Barto Phone Pranks System</title>
+
+    <meta charset="UTF-8">
+    <meta name="viewport", content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat|Orbitron:400,700" type="text/css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="css/app.css"/>
+  </head>
+
+  <body ng-app="bartoApp" ng-controller="PranksController">
+    <header class="cabecera">
+      <h1>Barto Phone Pranks</h1>
+    </header>
+    <section id="dashboard" class="background dashboard">
+      <div class="contenedor">
+        <div class="row">
+          <section class="col s12 m6">
+            <div class="contenedor-bromas">
+              <div>
+                <h3>Bromas Realizadas <b>{{jokesData.length}}</b> 
+                  <a href="#modalNewPrank" class="secondary-content modal-trigger" title="Agregar Registro">
+                    <i class="fa fa-plus-circle add-broma"></i>
+                  </a>
+                </h3>
+                <!-- MODAL NUEVA BROMA -->
+                <div id="modalNewPrank" class="modal modal-fixed-footer">
+                  <div class="modal-content">
+                    <h4>Agregar Broma</h4>
+                    <p>Completa el formulario para añadir una nueva broma</p>
+                    <div class="row">
+                      <form class="col s12">
+                        <div class="row">
+                          <div class="input-field col s12">
+                            <input placeholder="Escribe la broma!" id="txtBroma" type="text" class="validate" ng-model="joke.title">
+                            <label for="broma">Broma</label>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="input-field col s6">
+                            <input placeholder="Latitud" id="txtLat" type="text" class="validate" ng-model="joke.latitude">
+                            <label for="broma">Latitud</label>
+                          </div>
+                          <div class="input-field col s6">
+                            <input placeholder="Longitud" id="txtLon" type="text" class="validate" ng-model="joke.longitude">
+                            <label for="broma">Longitud</label>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="input-field col s6">
+                            <select ng-model="joke.owner">
+                              <option value="" disabled>Selecciona al Bromista</option>
+                              <option ng-repeat="item in jokerData" value="{{item.id}}">{{item.title}}</option>
+                            </select>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat ">Cancelar</a>
+                    <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat " ng-click="addJoke(joke)">Guardar</a>
+                  </div>
+                </div>
+              </div>
+              <div class="row margin-bottom">
+                <div class="col m12 scroll" id="scrolljokes">
+                  <ul class="collection">
+                    <li class="collection-item fuente-montserrat" ng-repeat="item in jokesData">
+                      <div>
+                        <br>
+                        <span class="title"><b>Broma N° {{item.id}}</b></span>
+                        <div class="op-broma">
+
+                          <!-- BOTON MODIFICAR NO IMPLEMENTADO!!
+                          <a class="waves-effect waves-light-blue btn-flat btnmodificar" title="Modificar"><i class="fa fa-pencil"></i></a>-->
+
+                          <a class="waves-effect waves-red  btn-flat btneliminar" title="Eliminar" ng-click="delJoke(item)"><i class="fa fa-trash-o"></i></a>
+
+                          <!-- MODAL MODIFICAR NO IMPLEMENTADO!! -->
+                          <div id="upd-modal" class="modal">
+                            <div class="modal-content">
+                              <h4>Modificar Broma</h4>
+                            </div>
+                            <div class="modal-footer">
+                              <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">Agree</a>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <p><b>Titulo:</b> {{item.title}}</p>
+                        <p><b>Realizada:</b> {{item.createdAt | date:'dd-MM-yyyy HH:mm:ss'}}</p>
+                        <p><b>Última Actualización:</b> {{item.updatedAt | date:'dd-MM-yyyy HH:mm:ss'}}</p>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section class="col s12 m6">
+            <div class="contenedor-grafico">
+              <h3>Volumen de Llamados</h3>
+              <canvas id="resumeChart" class="chart"></canvas>
+            </div>
+          </section>
+        </div>
+
+        <div class="center-align">
+          <h2>THE SIMPSONS</h2>
+        </div>
+
+        <div class="row">
+          <section class="col s12 m12">
+            <div class="contenedor-mapa">
+              <h3>Geolocalización Bromas Realizadas</h3>
+              <div id="map-canvas"></div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.6/angular.js"></script>
+    <script type="text/javascript" src="js/sails.io.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCp5H2rFjJc1-xuXnF3hTHw6bzZzdJInWU&callback=initMap" async defer></script>
+
+    <script type="text/javascript" src="js/Chart.bundle.min.js"></script>
+    <script type="text/javascript" src="js/barto.js"></script>
+    <script>
+      //LLAMADA A API
+      io.socket.url = 'http://bartopranks.nursoft.cl:1337';
+
+      //CHARTJS
+      var ctx = document.getElementById("resumeChart");
+      var chart = new Chart(ctx, {type: 'bar', data: {labels:[], datasets: []}, options: {legend: { display: false}, scales: {
+        xAxes: [{display: false}],
+        yAxes: [{ ticks: { beginAtZero:true } }] 
+      }}});
+
+      //GOOGLE MAP
+      var image = 'img/puntero.png';
+      var map;
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('map-canvas'), {
+          center: {lat: -33.27, lng: -70.38},
+          zoom: 8,
+          styles:[
+                      {
+                          "featureType": "administrative",
+                          "elementType": "labels.text.fill",
+                          "stylers": [
+                              {
+                                  "color": "#0c0b0b"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "landscape",
+                          "elementType": "all",
+                          "stylers": [
+                              {
+                                  "color": "#f2f2f2"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "poi",
+                          "elementType": "all",
+                          "stylers": [
+                              {
+                                  "visibility": "off"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "poi.attraction",
+                          "elementType": "geometry.fill",
+                          "stylers": [
+                              {
+                                  "visibility": "off"
+                              },
+                              {
+                                  "color": "#ff0000"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "poi.attraction",
+                          "elementType": "labels.text.fill",
+                          "stylers": [
+                              {
+                                  "visibility": "on"
+                              },
+                              {
+                                  "color": "#000000"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "poi.attraction",
+                          "elementType": "labels.text.stroke",
+                          "stylers": [
+                              {
+                                  "visibility": "off"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "poi.business",
+                          "elementType": "labels.text",
+                          "stylers": [
+                              {
+                                  "visibility": "on"
+                              },
+                              {
+                                  "color": "#ff0000"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "poi.business",
+                          "elementType": "labels.text.fill",
+                          "stylers": [
+                              {
+                                  "visibility": "on"
+                              },
+                              {
+                                  "color": "#000000"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "poi.business",
+                          "elementType": "labels.text.stroke",
+                          "stylers": [
+                              {
+                                  "visibility": "off"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "poi.government",
+                          "elementType": "all",
+                          "stylers": [
+                              {
+                                  "visibility": "on"
+                              },
+                              {
+                                  "saturation": "-100"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "poi.medical",
+                          "elementType": "all",
+                          "stylers": [
+                              {
+                                  "visibility": "on"
+                              },
+                              {
+                                  "saturation": "-100"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "poi.park",
+                          "elementType": "all",
+                          "stylers": [
+                              {
+                                  "visibility": "on"
+                              },
+                              {
+                                  "saturation": "-100"
+                              },
+                              {
+                                  "lightness": "30"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "poi.place_of_worship",
+                          "elementType": "all",
+                          "stylers": [
+                              {
+                                  "visibility": "on"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "poi.place_of_worship",
+                          "elementType": "labels.text",
+                          "stylers": [
+                              {
+                                  "visibility": "on"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "poi.place_of_worship",
+                          "elementType": "labels.text.fill",
+                          "stylers": [
+                              {
+                                  "visibility": "on"
+                              },
+                              {
+                                  "color": "#ff0000"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "poi.place_of_worship",
+                          "elementType": "labels.text.stroke",
+                          "stylers": [
+                              {
+                                  "visibility": "off"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "poi.place_of_worship",
+                          "elementType": "labels.icon",
+                          "stylers": [
+                              {
+                                  "visibility": "on"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "poi.school",
+                          "elementType": "all",
+                          "stylers": [
+                              {
+                                  "visibility": "on"
+                              },
+                              {
+                                  "saturation": "-100"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "poi.sports_complex",
+                          "elementType": "geometry.fill",
+                          "stylers": [
+                              {
+                                  "visibility": "on"
+                              },
+                              {
+                                  "saturation": "-100"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "poi.sports_complex",
+                          "elementType": "labels.text.fill",
+                          "stylers": [
+                              {
+                                  "visibility": "on"
+                              },
+                              {
+                                  "color": "#000000"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "poi.sports_complex",
+                          "elementType": "labels.text.stroke",
+                          "stylers": [
+                              {
+                                  "visibility": "off"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "road",
+                          "elementType": "all",
+                          "stylers": [
+                              {
+                                  "saturation": -100
+                              },
+                              {
+                                  "lightness": 45
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "road",
+                          "elementType": "labels.text.fill",
+                          "stylers": [
+                              {
+                                  "color": "#090909"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "road.highway",
+                          "elementType": "all",
+                          "stylers": [
+                              {
+                                  "visibility": "simplified"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "road.arterial",
+                          "elementType": "labels.icon",
+                          "stylers": [
+                              {
+                                  "visibility": "off"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "transit",
+                          "elementType": "all",
+                          "stylers": [
+                              {
+                                  "visibility": "off"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "transit.line",
+                          "elementType": "geometry.fill",
+                          "stylers": [
+                              {
+                                  "visibility": "on"
+                              },
+                              {
+                                  "weight": "1"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "transit.station.airport",
+                          "elementType": "geometry",
+                          "stylers": [
+                              {
+                                  "visibility": "on"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "transit.station.rail",
+                          "elementType": "geometry.fill",
+                          "stylers": [
+                              {
+                                  "visibility": "on"
+                              },
+                              {
+                                  "color": "#ff0000"
+                              },
+                              {
+                                  "weight": "1"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "transit.station.rail",
+                          "elementType": "labels.text",
+                          "stylers": [
+                              {
+                                  "visibility": "on"
+                              },
+                              {
+                                  "hue": "#ff0000"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "transit.station.rail",
+                          "elementType": "labels.icon",
+                          "stylers": [
+                              {
+                                  "visibility": "on"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "water",
+                          "elementType": "all",
+                          "stylers": [
+                              {
+                                  "color": "#d4e4eb"
+                              },
+                              {
+                                  "visibility": "on"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "water",
+                          "elementType": "geometry.fill",
+                          "stylers": [
+                              {
+                                  "visibility": "on"
+                              },
+                              {
+                                  "color": "#fef7f7"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "water",
+                          "elementType": "labels.text.fill",
+                          "stylers": [
+                              {
+                                  "color": "#9b7f7f"
+                              }
+                          ]
+                      },
+                      {
+                          "featureType": "water",
+                          "elementType": "labels.text.stroke",
+                          "stylers": [
+                              {
+                                  "color": "#fef7f7"
+                              }
+                          ]
+                      }
+                  ]
+        });
+      }
+      //SCROLL AUTO ABAJO
+      function scrollDown() {
+        $("#scrolljokes").animate({ scrollTop: $('#scrolljokes')[0].scrollHeight}, 1000);
+      }
+      setInterval("scrollDown()", 1000);
+    </script>
+  </body>
+</html>
